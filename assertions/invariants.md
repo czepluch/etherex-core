@@ -241,6 +241,7 @@ Etherex is a concentrated liquidity DEX implementing an x(3,3) governance model 
 
 - No tests in the repo
 - Repo doesn't compile. Lots of missing interfaces and libraries
+- No deployment script
 - No guide in docs on how to build or run the project
 - Contracts are verified on etherscan, but there's not a version in the repo that matches
 - The [audit linked of Shadow Exchange](https://diligence.consensys.io/audits/2024/08/ramses-v3/) mentions [a commit in a repository](https://github.com/RamsesExchange/Ramses-V3/commit/061c142c5f53e4d3d19d9caf8b093a837062cc17) that is no longer available
