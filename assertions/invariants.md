@@ -1,4 +1,4 @@
-# Etherex Protocol Critical Security Invariants
+# Etherex Protocol Invariants Mapping
 
 ## Executive Overview
 
@@ -15,72 +15,6 @@ Etherex is a concentrated liquidity DEX implementing an x(3,3) governance model 
 
 - **VERIFIED**: Enforced by smart contract logic (require statements, modifiers, etc.)
 - **UNVERIFIED**: Not enforced by contracts, requires external monitoring
-
-## Access Control Analysis
-
-### **Critical Admin Accounts & Powers**
-
-#### **1. Treasury (Multisig) - HIGHEST POWER**
-
-- **Role**: `DEFAULT_ADMIN_ROLE`, `SWAP_FEE_SETTER`, `PROTOCOL_OPERATOR`
-- **Powers**:
-  - Can reinitialize all core contracts (`reinit()`)
-  - Can set fee collectors and factories
-  - Can create fee distributors
-  - Can set voter addresses in factories
-  - Can update fee distributor for gauges
-  - Can set treasury addresses in all contracts
-  - Can set V3 factory implementation
-  - **CRITICAL**: Can change all contract references without timelock
-
-#### **2. Timelock - CRITICAL SAFEGUARD**
-
-- **Role**: `DEFAULT_ADMIN_ROLE`
-- **Powers**:
-  - Can execute arbitrary calls (`execute()`)
-  - Can change timelock address (`setNewTimelock()`)
-  - Can set cooldown exemptions
-  - Can change vote module cooldown
-  - **CRITICAL**: Can execute any payload on any contract
-
-#### **3. PROTOCOL_OPERATOR Role - HIGH POWER**
-
-- **Default Holder**: Treasury
-- **Powers**:
-  - Can kill/revive gauges
-  - Can create gauges (legacy and CL)
-  - Can set emissions ratios
-  - Can retrieve stuck emissions
-  - Can toggle xREX governance
-  - Can redeem xREX as operator
-  - Can migrate operators
-  - Can set emissions multipliers
-  - Can set treasury fees
-  - Can enable tick spacing
-  - Can set global fee protocols
-  - Can set legacy fee splits
-
-#### **4. SWAP_FEE_SETTER Role - MEDIUM POWER**
-
-- **Default Holder**: Treasury
-- **Powers**:
-  - Can set swap fees on pools
-  - Can set fee splits (CL and legacy)
-
-### **Access Control Risks**
-
-#### **HIGH RISK**
-
-1. **Treasury has excessive power**: Can reinitialize contracts without timelock
-2. **Timelock can execute arbitrary code**: `execute()` function allows any payload
-3. **No role separation**: Treasury holds multiple critical roles
-4. **Operator can kill gauges**: Can disable reward distribution
-
-#### **MEDIUM RISK**
-
-1. **Fee manipulation**: Treasury can change all fee structures
-2. **Emissions control**: Operator can adjust emission ratios
-3. **Gauge creation**: Operator can create gauges for any pool
 
 ## 1. Token Supply and Conservation (CRITICAL)
 
@@ -303,9 +237,21 @@ Etherex is a concentrated liquidity DEX implementing an x(3,3) governance model 
 - **Why Critical:** Ensures oracle manipulation resistance
 - **Check Difficulty:** EASY - Simple liquidity threshold validation
 
-## Most Critical Unverified Invariants
+## Additional Security Concerns
 
-High-level pseudo assertions for some of the most critical invariants.
+- No tests in the repo
+- Repo doesn't compile. Lots of missing interfaces and libraries
+- No guide in docs on how to build or run the project
+- Contracts are verified on etherscan, but there's not a version in the repo that matches
+- The [audit linked of Shadow Exchange](https://diligence.consensys.io/audits/2024/08/ramses-v3/) mentions [a commit in a repository](https://github.com/RamsesExchange/Ramses-V3/commit/061c142c5f53e4d3d19d9caf8b093a837062cc17) that is no longer available
+- The [Etherex Team Multisig](https://lineascan.build/address/0xde4B22Eb9F9c2C55e72e330C87663b28e9d388f7#readProxyContract) is a 1/3 multisig
+
+## Missing Cheatcodes/Functionality
+
+- More flexible ownership checks for contracts
+- Consider increasing assertion gas limit (should be easy, so let's only do it if we run into limits)
+
+## Pseudo Assertions for Critical Unverified Invariants
 
 ### 1. x(3,3) Cross-Contract Conservation
 
@@ -509,16 +455,68 @@ contract PriceDeviationAssertion is Assertion {
 }
 ```
 
-## Additional Security Concerns
+## Access Control Analysis
 
-- No tests in the repo
-- Repo doesn't compile. Lots of missing interfaces and libraries
-- No guide in docs on how to build or run the project
-- Contracts are verified on etherscan, but there's not a version in the repo that matches
-- The [audit linked of Shadow Exchange](https://diligence.consensys.io/audits/2024/08/ramses-v3/) mentions [a commit in a repository](https://github.com/RamsesExchange/Ramses-V3/commit/061c142c5f53e4d3d19d9caf8b093a837062cc17) that is no longer available
-- The [Etherex Team Multisig](https://lineascan.build/address/0xde4B22Eb9F9c2C55e72e330C87663b28e9d388f7#readProxyContract) is a 1/3 multisig
+### **Critical Admin Accounts & Powers**
 
-## Missing Cheatcodes/Functionality
+#### **1. Treasury (Multisig) - HIGHEST POWER**
 
-- More flexible ownership checks for contracts
-- Consider increasing assertion gas limit (should be easy, so let's only do it if we run into limits)
+- **Role**: `DEFAULT_ADMIN_ROLE`, `SWAP_FEE_SETTER`, `PROTOCOL_OPERATOR`
+- **Powers**:
+  - Can reinitialize all core contracts (`reinit()`)
+  - Can set fee collectors and factories
+  - Can create fee distributors
+  - Can set voter addresses in factories
+  - Can update fee distributor for gauges
+  - Can set treasury addresses in all contracts
+  - Can set V3 factory implementation
+  - **CRITICAL**: Can change all contract references without timelock
+
+#### **2. Timelock - CRITICAL SAFEGUARD**
+
+- **Role**: `DEFAULT_ADMIN_ROLE`
+- **Powers**:
+  - Can execute arbitrary calls (`execute()`)
+  - Can change timelock address (`setNewTimelock()`)
+  - Can set cooldown exemptions
+  - Can change vote module cooldown
+  - **CRITICAL**: Can execute any payload on any contract
+
+#### **3. PROTOCOL_OPERATOR Role - HIGH POWER**
+
+- **Default Holder**: Treasury
+- **Powers**:
+  - Can kill/revive gauges
+  - Can create gauges (legacy and CL)
+  - Can set emissions ratios
+  - Can retrieve stuck emissions
+  - Can toggle xREX governance
+  - Can redeem xREX as operator
+  - Can migrate operators
+  - Can set emissions multipliers
+  - Can set treasury fees
+  - Can enable tick spacing
+  - Can set global fee protocols
+  - Can set legacy fee splits
+
+#### **4. SWAP_FEE_SETTER Role - MEDIUM POWER**
+
+- **Default Holder**: Treasury
+- **Powers**:
+  - Can set swap fees on pools
+  - Can set fee splits (CL and legacy)
+
+### **Access Control Risks**
+
+#### **HIGH RISK**
+
+1. **Treasury has excessive power**: Can reinitialize contracts without timelock
+2. **Timelock can execute arbitrary code**: `execute()` function allows any payload
+3. **No role separation**: Treasury holds multiple critical roles
+4. **Operator can kill gauges**: Can disable reward distribution
+
+#### **MEDIUM RISK**
+
+1. **Fee manipulation**: Treasury can change all fee structures
+2. **Emissions control**: Operator can adjust emission ratios
+3. **Gauge creation**: Operator can create gauges for any pool
